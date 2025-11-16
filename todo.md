@@ -26,3 +26,8 @@
 - [x] Fix audio autoplay to start playing on first user interaction
 - [x] Deploy audio autoplay fix to production
 - [x] Verify audio plays automatically on live site
+- [x] Fix audio to autoplay correctly on page load
+- [x] Fix mute button to properly toggle audio on/off
+- [x] Test audio autoplay and mute toggle locally
+- [ ] Deploy audio fix to production
+- [ ] Verify audio works correctly on live site

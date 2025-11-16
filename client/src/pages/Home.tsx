@@ -7,7 +7,6 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [videoOpacity, setVideoOpacity] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [audioStarted, setAudioStarted] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -41,7 +40,7 @@ export default function Home() {
     // Handle audio end event to loop with 2-second pause
     const handleAudioEnd = () => {
       setTimeout(() => {
-        if (audio && !isMuted) {
+        if (audio && !audio.paused) {
           audio.currentTime = 0;
           audio.play().catch(console.error);
         }
@@ -53,31 +52,22 @@ export default function Home() {
     // Try to autoplay immediately
     const tryAutoplay = () => {
       audio.play()
-        .then(() => {
-          setAudioStarted(true);
-        })
         .catch(() => {
-          // Autoplay blocked, set up listeners for user interaction
-          if (!audioStarted) {
-            const startAudio = () => {
-              audio.play()
-                .then(() => {
-                  setAudioStarted(true);
-                  // Remove listeners after successful play
-                  document.removeEventListener('click', startAudio);
-                  document.removeEventListener('touchstart', startAudio);
-                  document.removeEventListener('keydown', startAudio);
-                  document.removeEventListener('mousemove', startAudio);
-                })
-                .catch(console.error);
-            };
+          // Autoplay blocked, set up listener for first user interaction
+          const startAudio = () => {
+            audio.play().catch(console.error);
+            // Remove listeners after first interaction
+            document.removeEventListener('click', startAudio);
+            document.removeEventListener('touchstart', startAudio);
+            document.removeEventListener('keydown', startAudio);
+            document.removeEventListener('mousemove', startAudio);
+          };
 
-            // Listen for any user interaction
-            document.addEventListener('click', startAudio, { once: true });
-            document.addEventListener('touchstart', startAudio, { once: true });
-            document.addEventListener('keydown', startAudio, { once: true });
-            document.addEventListener('mousemove', startAudio, { once: true });
-          }
+          // Listen for any user interaction
+          document.addEventListener('click', startAudio, { once: true });
+          document.addEventListener('touchstart', startAudio, { once: true });
+          document.addEventListener('keydown', startAudio, { once: true });
+          document.addEventListener('mousemove', startAudio, { once: true });
         });
     };
 
@@ -86,18 +76,20 @@ export default function Home() {
     return () => {
       audio.removeEventListener('ended', handleAudioEnd);
     };
-  }, [audioStarted, isMuted]);
+  }, []);
 
   const toggleMute = () => {
     const audio = audioRef.current;
-    if (audio) {
-      if (isMuted) {
-        audio.play().catch(console.error);
-        setIsMuted(false);
-      } else {
-        audio.pause();
-        setIsMuted(true);
-      }
+    if (!audio) return;
+
+    if (isMuted) {
+      // Currently muted, unmute and play
+      audio.play().catch(console.error);
+      setIsMuted(false);
+    } else {
+      // Currently playing, mute and pause
+      audio.pause();
+      setIsMuted(true);
     }
   };
 
