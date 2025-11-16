@@ -6,7 +6,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [videoOpacity, setVideoOpacity] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -47,34 +47,46 @@ export default function Home() {
       }, 2000);
     };
 
+    // Sync state with actual audio playing state
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
     audio.addEventListener('ended', handleAudioEnd);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
 
     // Try to autoplay immediately
-    const tryAutoplay = () => {
-      audio.play()
-        .catch(() => {
-          // Autoplay blocked, set up listener for first user interaction
-          const startAudio = () => {
-            audio.play().catch(console.error);
-            // Remove listeners after first interaction
-            document.removeEventListener('click', startAudio);
-            document.removeEventListener('touchstart', startAudio);
-            document.removeEventListener('keydown', startAudio);
-            document.removeEventListener('mousemove', startAudio);
-          };
+    audio.play()
+      .then(() => {
+        setIsPlaying(true);
+      })
+      .catch(() => {
+        // Autoplay blocked, set up listener for first user interaction
+        setIsPlaying(false);
+        
+        const startAudio = () => {
+          audio.play()
+            .then(() => setIsPlaying(true))
+            .catch(console.error);
+          
+          // Remove listeners after first interaction
+          document.removeEventListener('click', startAudio);
+          document.removeEventListener('touchstart', startAudio);
+          document.removeEventListener('keydown', startAudio);
+          document.removeEventListener('mousemove', startAudio);
+        };
 
-          // Listen for any user interaction
-          document.addEventListener('click', startAudio, { once: true });
-          document.addEventListener('touchstart', startAudio, { once: true });
-          document.addEventListener('keydown', startAudio, { once: true });
-          document.addEventListener('mousemove', startAudio, { once: true });
-        });
-    };
-
-    tryAutoplay();
+        // Listen for any user interaction
+        document.addEventListener('click', startAudio, { once: true });
+        document.addEventListener('touchstart', startAudio, { once: true });
+        document.addEventListener('keydown', startAudio, { once: true });
+        document.addEventListener('mousemove', startAudio, { once: true });
+      });
 
     return () => {
       audio.removeEventListener('ended', handleAudioEnd);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
     };
   }, []);
 
@@ -82,14 +94,15 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isMuted) {
-      // Currently muted, unmute and play
-      audio.play().catch(console.error);
-      setIsMuted(false);
+    if (audio.paused) {
+      // Audio is paused, play it
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(console.error);
     } else {
-      // Currently playing, mute and pause
+      // Audio is playing, pause it
       audio.pause();
-      setIsMuted(true);
+      setIsPlaying(false);
     }
   };
 
@@ -129,12 +142,12 @@ export default function Home() {
       <button
         onClick={toggleMute}
         className="fixed bottom-6 right-6 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm p-3 rounded-full transition-all duration-300 border border-white/20"
-        aria-label={isMuted ? "Unmute" : "Mute"}
+        aria-label={isPlaying ? "Mute" : "Unmute"}
       >
-        {isMuted ? (
-          <VolumeX className="w-6 h-6 text-white" />
-        ) : (
+        {isPlaying ? (
           <Volume2 className="w-6 h-6 text-white" />
+        ) : (
+          <VolumeX className="w-6 h-6 text-white" />
         )}
       </button>
     </div>
