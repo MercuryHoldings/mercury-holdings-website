@@ -24,5 +24,5 @@
 - [x] Deploy changes to production
 - [x] Verify live site with new favicon and title
 - [x] Fix audio autoplay to start playing on first user interaction
-- [ ] Deploy audio autoplay fix to production
-- [ ] Verify audio plays automatically on live site
+- [x] Deploy audio autoplay fix to production
+- [x] Verify audio plays automatically on live site
