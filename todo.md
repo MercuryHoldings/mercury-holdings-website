@@ -19,7 +19,7 @@
 - [x] Update audio to loop with 2-second pause between plays
 - [x] Fix GitHub authentication and successfully push code
 - [x] Set up Render deployment with proper build configuration
-- [ ] Add Mercury Holdings symbol as favicon
-- [ ] Update page title to "Mercury Holdings"
-- [ ] Deploy changes to production
+- [x] Add Mercury Holdings symbol as favicon
+- [x] Update page title to "Mercury Holdings"
+- [x] Deploy changes to production
 - [ ] Verify live site with new favicon and title
