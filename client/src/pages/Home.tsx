@@ -41,6 +41,22 @@ export default function Home() {
         // Autoplay was prevented, user will need to interact with the page
         console.log("Autoplay prevented");
       });
+
+      // Handle audio end event to loop with 2-second pause
+      const handleAudioEnd = () => {
+        setTimeout(() => {
+          if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(console.error);
+          }
+        }, 2000);
+      };
+
+      audio.addEventListener('ended', handleAudioEnd);
+
+      return () => {
+        audio.removeEventListener('ended', handleAudioEnd);
+      };
     }
   }, []);
 
@@ -72,7 +88,7 @@ export default function Home() {
       </video>
 
       {/* Background Audio */}
-      <audio ref={audioRef} loop>
+      <audio ref={audioRef}>
         <source src="/background-music.mp3" type="audio/mpeg" />
       </audio>
 
