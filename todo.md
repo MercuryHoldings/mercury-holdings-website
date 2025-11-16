@@ -14,8 +14,12 @@
 - [x] Push code to GitHub repository
 - [x] Deploy website to Render
 - [x] Configure custom domain on Render
-- [ ] Update NameCheap DNS records to point to Render
-- [ ] Verify live deployment with custom domain
+- [x] Update NameCheap DNS records to point to Render
+- [x] Verify live deployment with custom domain (pending DNS propagation)
 - [x] Update audio to loop with 2-second pause between plays
 - [x] Fix GitHub authentication and successfully push code
 - [x] Set up Render deployment with proper build configuration
+- [ ] Add Mercury Holdings symbol as favicon
+- [ ] Update page title to "Mercury Holdings"
+- [ ] Deploy changes to production
+- [ ] Verify live site with new favicon and title
