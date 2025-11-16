@@ -1,28 +1,61 @@
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { APP_LOGO, APP_TITLE } from "@/const";
-import { Streamdown } from 'streamdown';
+import { APP_LOGO } from "@/const";
+import { useEffect, useRef, useState } from "react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Best Practices, Design Guide and Common Pitfalls
- */
 export default function Home() {
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoOpacity, setVideoOpacity] = useState(1);
 
-  // Use APP_LOGO (as image src) and APP_TITLE if needed
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      const duration = video.duration;
+      const currentTime = video.currentTime;
+      
+      // Start fading out 0.5 seconds before the end
+      if (duration - currentTime < 0.5) {
+        const fadeProgress = (duration - currentTime) / 0.5;
+        setVideoOpacity(fadeProgress);
+      } else if (currentTime < 0.5) {
+        // Fade in at the start
+        const fadeProgress = currentTime / 0.5;
+        setVideoOpacity(fadeProgress);
+      } else {
+        setVideoOpacity(1);
+      }
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    return () => video.removeEventListener("timeupdate", handleTimeUpdate);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0a2540]">
+      {/* Background Video */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        style={{ opacity: videoOpacity }}
+      >
+        <source src="/background-video.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay to darken video slightly */}
+      <div className="absolute inset-0 bg-black/20" />
+
+      {/* Logo */}
+      <header className="relative z-10 p-6 md:p-8">
+        <img
+          src={APP_LOGO}
+          alt="Mercury Holdings"
+          className="h-12 md:h-16 w-auto"
+        />
+      </header>
     </div>
   );
 }
