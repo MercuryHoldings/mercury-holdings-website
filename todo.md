@@ -29,5 +29,5 @@
 - [x] Fix audio to autoplay correctly on page load
 - [x] Fix mute button to properly toggle audio on/off
 - [x] Test audio autoplay and mute toggle locally
-- [ ] Deploy audio fix to production
-- [ ] Verify audio works correctly on live site
+- [x] Deploy audio fix to production
+- [x] Verify audio works correctly on live site
