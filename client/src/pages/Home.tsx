@@ -7,6 +7,7 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [videoOpacity, setVideoOpacity] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [audioStarted, setAudioStarted] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -34,41 +35,69 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Attempt to autoplay audio
     const audio = audioRef.current;
-    if (audio) {
-      audio.play().catch(() => {
-        // Autoplay was prevented, user will need to interact with the page
-        console.log("Autoplay prevented");
-      });
+    if (!audio) return;
 
-      // Handle audio end event to loop with 2-second pause
-      const handleAudioEnd = () => {
-        setTimeout(() => {
-          if (audio) {
-            audio.currentTime = 0;
-            audio.play().catch(console.error);
+    // Handle audio end event to loop with 2-second pause
+    const handleAudioEnd = () => {
+      setTimeout(() => {
+        if (audio && !isMuted) {
+          audio.currentTime = 0;
+          audio.play().catch(console.error);
+        }
+      }, 2000);
+    };
+
+    audio.addEventListener('ended', handleAudioEnd);
+
+    // Try to autoplay immediately
+    const tryAutoplay = () => {
+      audio.play()
+        .then(() => {
+          setAudioStarted(true);
+        })
+        .catch(() => {
+          // Autoplay blocked, set up listeners for user interaction
+          if (!audioStarted) {
+            const startAudio = () => {
+              audio.play()
+                .then(() => {
+                  setAudioStarted(true);
+                  // Remove listeners after successful play
+                  document.removeEventListener('click', startAudio);
+                  document.removeEventListener('touchstart', startAudio);
+                  document.removeEventListener('keydown', startAudio);
+                  document.removeEventListener('mousemove', startAudio);
+                })
+                .catch(console.error);
+            };
+
+            // Listen for any user interaction
+            document.addEventListener('click', startAudio, { once: true });
+            document.addEventListener('touchstart', startAudio, { once: true });
+            document.addEventListener('keydown', startAudio, { once: true });
+            document.addEventListener('mousemove', startAudio, { once: true });
           }
-        }, 2000);
-      };
+        });
+    };
 
-      audio.addEventListener('ended', handleAudioEnd);
+    tryAutoplay();
 
-      return () => {
-        audio.removeEventListener('ended', handleAudioEnd);
-      };
-    }
-  }, []);
+    return () => {
+      audio.removeEventListener('ended', handleAudioEnd);
+    };
+  }, [audioStarted, isMuted]);
 
   const toggleMute = () => {
     const audio = audioRef.current;
     if (audio) {
       if (isMuted) {
-        audio.play();
+        audio.play().catch(console.error);
+        setIsMuted(false);
       } else {
         audio.pause();
+        setIsMuted(true);
       }
-      setIsMuted(!isMuted);
     }
   };
 
