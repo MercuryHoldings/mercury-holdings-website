@@ -22,4 +22,4 @@
 - [x] Add Mercury Holdings symbol as favicon
 - [x] Update page title to "Mercury Holdings"
 - [x] Deploy changes to production
-- [ ] Verify live site with new favicon and title
+- [x] Verify live site with new favicon and title
